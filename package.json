@@ -1,0 +1,27 @@
+{
+  "name": "@timurua/yacache",
+  "version": "0.0.1",
+  "description": "Yet Another Javascript Cache",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/timurua/yacache.git"
+  },
+  "keywords": [
+    "lru",
+    "cache"
+  ],
+  "author": "Timur Valiulin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/timurua/yacache/issues"
+  },
+  "homepage": "https://github.com/timurua/yacache#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "jest": "^24.0.0"
+  }
+}
