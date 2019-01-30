@@ -33,9 +33,7 @@ class Cache {
         const item = this.items[key];
         if (typeof item !== 'undefined') {
             if (this._isValidItem(item)) {
-                return new Promise(function (resolve) {
-                    resolve(item.item);
-                });
+                return Promise.resolve(item.item);
             } else {
                 delete this.items[key];
             }
