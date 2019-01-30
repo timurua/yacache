@@ -14,11 +14,15 @@ class CacheItem {
 
 class Cache {
     // maxCreatedAgeMilliseconds;
+    // factoryMethod
+    // pendingPromises
 
     constructor(config) {
         this.maxCreatedAgeMilliseconds = config.maxCreatedAgeMilliseconds ? config.maxCreatedAgeMilliseconds : 1000 * 60 * 60;
-        this.itemConfigs = {};
+        this.factoryMethod = config.factoryMethod;
+        this.pendingPromises = {};
         this.items = {};
+
     }
 
     _isValidItem(item) {
@@ -36,25 +40,32 @@ class Cache {
                 delete this.items[key];
             }
         }
-        const itemConfig = this.itemConfigs[key];
-        if (typeof itemConfig !== 'undefined') {
-            return new Promise((resolve, reject)=> {
-                itemConfig.factory().then((newItem) => {
-                    this.items[key] = new CacheItem(newItem);
-                    resolve(newItem);
-                }).catch((error) => {
-                    reject(error);
-                });
-            });
-        }
-        throw `No factory method defined for key ${key}`;
 
+        if (typeof this.factoryMethod === 'undefined') {
+            throw `No factory method defined for key ${key}`;
+        }
+
+        let pendingPromise = this.pendingPromises[key];
+        if (typeof pendingPromise !== 'undefined') {
+            return pendingPromise;
+        }
+
+        pendingPromise = new Promise((resolve, reject)=> {
+            this.factoryMethod(key).then((newItem) => {
+                delete this.pendingPromises[key];
+                this.items[key] = new CacheItem(newItem);
+                resolve(newItem);
+            }).catch((error) => {
+                delete this.pendingPromises[key];
+                reject(error);
+            });
+        });
+        this.pendingPromises[key] = pendingPromise;
+        return pendingPromise;
     }
 
-    addItemConfig(key, config) {
-        this.itemConfigs[key] = {
-            factory: config.factory
-        };
+    put(key, value){
+        this.items[key] = new CacheItem(value);
     }
 }
 

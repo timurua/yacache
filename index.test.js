@@ -1,20 +1,22 @@
 var {Cache} = require('.');
 
 test('basic', async function () {
-    const cache = new Cache({});
-    cache.addItemConfig("one", {
-        factory: ()=> {
-            return new Promise(function(resolve, reject){
+    let seenKey = null;
+    const cache = new Cache({
+        factoryMethod: (key) => {
+            seenKey = key;
+            return new Promise(function (resolve, reject) {
                 resolve("oneValue");
             });
         }
     });
     const value = await cache.get('one');
+    expect(seenKey).toBe('one');
     expect(value).toBe('oneValue');
 });
 
 test('no factory', async function () {
-    const testThrow = ()=>{
+    const testThrow = () => {
         const cache = new Cache({});
         cache.get("one");
     };
@@ -22,16 +24,15 @@ test('no factory', async function () {
 });
 
 test('repeat', async function () {
-    const cache = new Cache({});
-    let times = 0;
-    cache.addItemConfig("one", {
-        factory: ()=> {
+    const cache = new Cache({
+        factoryMethod: () => {
             times++;
-            return new Promise(function(resolve, reject){
+            return new Promise(function (resolve, reject) {
                 resolve("oneValue");
             });
         }
     });
+    let times = 0;
     const value1 = await cache.get('one');
     expect(value1).toBe('oneValue');
     const value2 = await cache.get('one');
