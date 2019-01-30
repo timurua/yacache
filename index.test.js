@@ -24,6 +24,7 @@ test('no factory', async function () {
 });
 
 test('repeat', async function () {
+    let times = 0;
     const cache = new Cache({
         factoryMethod: () => {
             times++;
@@ -32,7 +33,25 @@ test('repeat', async function () {
             });
         }
     });
+    const value1 = await cache.get('one');
+    expect(value1).toBe('oneValue');
+    const value2 = await cache.get('one');
+    expect(value2).toBe('oneValue');
+    expect(times).toBe(1);
+});
+
+test('delay', async function () {
     let times = 0;
+    const cache = new Cache({
+        factoryMethod: () => {
+            times++;
+            return new Promise(function (resolve, reject) {
+                setTimeout(()=>{
+                    resolve("oneValue");
+                }, 1);
+            });
+        }
+    });
     const value1 = await cache.get('one');
     expect(value1).toBe('oneValue');
     const value2 = await cache.get('one');
